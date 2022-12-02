@@ -1,23 +1,19 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO ffmpeg/ffmpeg
-    REF n5.0
-    SHA512 4b9f0b207031fb53fe8b03dfa7ad62a58ec60f68911d7200238249152937ba4393f28ada24361217ee6324900b92bf9abefc754cccbd673bd6780482bf62eba6
+    REF n5.1.2
+    SHA512 1b90c38b13149f2de7618ad419adc277afd5e65bbf52b849a7245aec0f92f73189c8547599dba8408b8828a767c1120f132727b57cd6231cd8b81de2471a4b8b
     HEAD_REF master
     PATCHES
         0001-create-lib-libraries.patch
-        0003-fix-windowsinclude.patch
         0004-fix-debug-build.patch
         0006-fix-StaticFeatures.patch
         0007-fix-lib-naming.patch
         0009-Fix-fdk-detection.patch
-        0011-Fix-x265-detection.patch
         0012-Fix-ssl-110-detection.patch
         0013-define-WINVER.patch
         0015-Fix-xml2-detection.patch
-        0019-libx264-Do-not-explicitly-set-X264_API_IMPORTS.patch
         0020-fix-aarch64-libswscale.patch
-        0021-fix-sdl2-version-check.patch
         0022-fix-iconv.patch
 )
 
@@ -730,7 +726,7 @@ function(extract_regex_from_file out)
     set("${out}" "${CMAKE_MATCH_1}" PARENT_SCOPE)
 endfunction()
 
-function(extract_version_from_component out)
+function(extract_version_from_component_legacy out)
     cmake_parse_arguments(PARSE_ARGV 1 "arg" "" "COMPONENT" "")
     string(TOLOWER "${arg_COMPONENT}" component_lower)
     string(TOUPPER "${arg_COMPONENT}" component_upper)
@@ -749,12 +745,31 @@ function(extract_version_from_component out)
     set("${out}" "${major_version}.${minor_version}.${micro_version}" PARENT_SCOPE)
 endfunction()
 
+function(extract_version_from_component out)
+    cmake_parse_arguments(PARSE_ARGV 1 "arg" "" "COMPONENT" "")
+    string(TOLOWER "${arg_COMPONENT}" component_lower)
+    string(TOUPPER "${arg_COMPONENT}" component_upper)
+    extract_regex_from_file(major_version
+        FILE "${SOURCE_PATH}/${component_lower}/version_major.h"
+        REGEX "#define ${component_upper}_VERSION_MAJOR[ ]+([0-9]+)"
+    )
+    extract_regex_from_file(minor_version
+        FILE "${SOURCE_PATH}/${component_lower}/version.h"
+        REGEX "#define ${component_upper}_VERSION_MINOR[ ]+([0-9]+)"
+    )
+    extract_regex_from_file(micro_version
+        FILE "${SOURCE_PATH}/${component_lower}/version.h"
+        REGEX "#define ${component_upper}_VERSION_MICRO[ ]+([0-9]+)"
+    )
+    set("${out}" "${major_version}.${minor_version}.${micro_version}" PARENT_SCOPE)
+endfunction()
+
 extract_regex_from_file(FFMPEG_VERSION
     FILE "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/libavutil/ffversion.h"
     REGEX "#define FFMPEG_VERSION[ ]+\"(.+)\""
 )
 
-extract_version_from_component(LIBAVUTIL_VERSION
+extract_version_from_component_legacy(LIBAVUTIL_VERSION
     COMPONENT libavutil)
 extract_version_from_component(LIBAVCODEC_VERSION
     COMPONENT libavcodec)
@@ -762,7 +777,7 @@ extract_version_from_component(LIBAVDEVICE_VERSION
     COMPONENT libavdevice)
 extract_version_from_component(LIBAVFILTER_VERSION
     COMPONENT libavfilter)
-extract_version_from_component( LIBAVFORMAT_VERSION
+extract_version_from_component(LIBAVFORMAT_VERSION
     COMPONENT libavformat)
 extract_version_from_component(LIBSWRESAMPLE_VERSION
     COMPONENT libswresample)
