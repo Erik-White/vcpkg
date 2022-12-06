@@ -338,6 +338,12 @@ else()
     set(OPTIONS "${OPTIONS} --disable-libopus")
 endif()
 
+if("pocketsphinx" IN_LIST FEATURES)
+    set(OPTIONS "${OPTIONS} --enable-pocketsphinx")
+else()
+    set(OPTIONS "${OPTIONS} --disable-pocketsphinx")
+endif()
+
 if("sdl2" IN_LIST FEATURES)
     set(OPTIONS "${OPTIONS} --enable-sdl2")
 else()

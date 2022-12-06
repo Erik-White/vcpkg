@@ -500,6 +500,12 @@
         "opus"
       ]
     },
+    "pocketsphinx": {
+      "description": "Automatic speech recognition with PocketSphinx",
+      "dependencies": [
+        "pocketsphinx"
+      ]
+    },
     "postproc": {
       "description": "Build the postproc library",
       "dependencies": [
